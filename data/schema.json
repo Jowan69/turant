@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Turant emergency actions",
+  "description": "Official bank block/call actions. Every entry must carry the URL of the bank's own page it was verified from and a dated verifier.",
+  "$comment": "ids must be unique; that cross-entry rule is enforced by scripts/validate.mjs because JSON Schema cannot compare one property across array items.",
+  "type": "array",
+  "minItems": 1,
+  "uniqueItems": true,
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "bank",
+      "problem",
+      "channel",
+      "to",
+      "sms_template",
+      "needs",
+      "find_on_page",
+      "source_url",
+      "verified_by",
+      "verified_on",
+      "note_en"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+      },
+      "bank": {
+        "enum": ["sbi", "hdfc", "icici", "axis", "pnb", "any"]
+      },
+      "problem": {
+        "enum": ["debit_lost", "credit_lost", "upi_misuse", "money_taken"]
+      },
+      "channel": {
+        "enum": ["sms", "call"]
+      },
+      "to": {
+        "type": "string",
+        "description": "Digits only. A leading plus is allowed only for an Indian +91 number.",
+        "pattern": "^(?:\\+91)?[0-9]+$"
+      },
+      "sms_template": {
+        "type": ["string", "null"],
+        "description": "Text the user sends. {last4} or {card} is filled in at tap time. Null for calls."
+      },
+      "needs": {
+        "enum": ["last4", "full_card", "none"]
+      },
+      "find_on_page": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Literal text that appears on source_url, used to confirm the entry."
+      },
+      "source_url": {
+        "type": "string",
+        "pattern": "^https://([a-z0-9-]+\\.)*(bank\\.in|gov\\.in)/"
+      },
+      "verified_by": {
+        "type": "string",
+        "minLength": 1
+      },
+      "verified_on": {
+        "type": "string",
+        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+      },
+      "note_en": {
+        "type": "string"
+      }
+    },
+    "allOf": [
+      {
+        "if": {
+          "properties": { "channel": { "const": "sms" } },
+          "required": ["channel"]
+        },
+        "then": {
+          "properties": {
+            "sms_template": { "type": "string", "minLength": 1 }
+          }
+        }
+      },
+      {
+        "if": {
+          "properties": { "channel": { "const": "call" } },
+          "required": ["channel"]
+        },
+        "then": {
+          "properties": {
+            "sms_template": { "type": "null" }
+          }
+        }
+      },
+      {
+        "if": {
+          "properties": { "needs": { "const": "last4" } },
+          "required": ["needs"]
+        },
+        "then": {
+          "properties": {
+            "sms_template": { "type": "string", "pattern": "\\{last4\\}" }
+          }
+        }
+      },
+      {
+        "if": {
+          "properties": { "needs": { "const": "full_card" } },
+          "required": ["needs"]
+        },
+        "then": {
+          "properties": {
+            "sms_template": { "type": "string", "pattern": "\\{card\\}" }
+          }
+        }
+      }
+    ]
+  }
+}
