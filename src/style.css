@@ -15,6 +15,7 @@
   --panel: #f2f5f9;
   --accent: #063a8f;
   --accent-fg: #ffffff;
+  --danger: #a3231b;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,6 +27,7 @@
     --panel: #161c25;
     --accent: #9dc0ff;
     --accent-fg: #0b1016;
+    --danger: #ff8f85;
   }
 }
 
@@ -136,6 +138,213 @@ button:focus-visible {
 .disclaimer {
   margin: 1.5rem 0 0;
   padding-top: 1rem;
+  border-top: 2px solid var(--line);
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+/* Bank picker and problem picker */
+
+.tiles,
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tile,
+.problem-button,
+.action-button {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  color: var(--fg);
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 0.6rem;
+  text-decoration: none;
+}
+
+.tile {
+  /* 5.5rem is 99px: comfortably above the 96px minimum touch target. */
+  min-height: 5.5rem;
+  padding: 0.9rem 1rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.tile .icon {
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--accent);
+}
+
+.tile.danger {
+  border-color: var(--danger);
+}
+
+.tile.danger .icon {
+  color: var(--danger);
+}
+
+.tile:hover,
+.problem-button:hover,
+.action-button.secondary:hover {
+  border-color: var(--accent);
+}
+
+.problem-button {
+  width: 100%;
+  min-height: 4.25rem;
+  padding: 0.85rem 1rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.tile:focus-visible,
+.problem-button:focus-visible,
+.action-button:focus-visible,
+.source a:focus-visible,
+.back:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.bank-picker {
+  margin: 1.5rem 0 0;
+}
+
+.section-label {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+  line-height: 1.3;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  margin: 0 0 0.75rem;
+  color: var(--accent);
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.subtitle {
+  margin: -0.25rem 0 1rem;
+  color: var(--muted);
+}
+
+.empty {
+  color: var(--muted);
+}
+
+/* Action card */
+
+.action-card {
+  margin: 0;
+  padding: 1rem;
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 0.75rem;
+}
+
+.field-label {
+  display: block;
+  margin: 0 0 0.4rem;
+  font-weight: 700;
+}
+
+.digits {
+  width: 100%;
+  min-height: 3.5rem;
+  padding: 0.7rem 0.9rem;
+  color: var(--fg);
+  background: var(--bg);
+  border: 2px solid var(--line);
+  border-radius: 0.5rem;
+  font: inherit;
+  font-size: 1.5rem;
+  letter-spacing: 0.12em;
+}
+
+.digits:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.action-button {
+  justify-content: center;
+  width: 100%;
+  min-height: 4.25rem;
+  margin-top: 0.25rem;
+  padding: 0.9rem 1rem;
+  color: var(--accent-fg);
+  background: var(--accent);
+  border-color: var(--accent);
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.action-button.secondary {
+  margin-top: 0.9rem;
+  color: var(--fg);
+  background: var(--bg);
+  border-color: var(--line);
+}
+
+.action-button.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.action-text {
+  margin: 0.9rem 0 0;
+  padding: 0.8rem 1rem;
+  background: var(--bg);
+  border: 2px solid var(--line);
+  border-radius: 0.5rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.note {
+  margin: 0.9rem 0 0;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.source {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.6rem;
+  align-items: baseline;
+  margin: 1rem 0 0;
+  font-size: 1rem;
+}
+
+.source a {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.verified {
+  color: var(--muted);
+}
+
+.other-ways {
+  margin: 1.25rem 0 0;
+}
+
+.check-line {
+  margin: 0.9rem 0 0;
+  padding-top: 0.9rem;
   border-top: 2px solid var(--line);
   color: var(--muted);
   font-size: 1rem;

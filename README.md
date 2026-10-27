@@ -6,7 +6,7 @@ Turant is a static web app. There is no backend, no analytics and no runtime dep
 
 ## Status
 
-Scaffold. The app shell renders and validates, but `data/actions.json` and `data/grievance.json` have no banks yet, so the app shows that bank data is not loaded. Bank entries are added only from a bank's own official source, with the source recorded in `evidence/`.
+The core flow works: pick a bank (or "Money stolen"), pick the problem, then send the bank's official SMS or dial its official number. Actions come from `data/actions.json`, imported at build time, and every entry links back to the bank's own page with its verification date. Bank entries are added only from a bank's own official source, with the source recorded in `evidence/`.
 
 ## Getting started
 
@@ -22,7 +22,8 @@ npm run preview   # serve the built output
 ## Layout
 
 - `index.html` — the shell, with `<main id="app">`.
-- `src/main.ts` — renders the UI and the language switcher.
+- `src/main.ts` — the hash router and the three screens (bank, problem, action).
+- `src/links.ts` — pure helpers for the SMS body, `sms:` links and `tel:` links.
 - `src/style.css` — plain CSS, single column, 18px minimum text, works from 360px.
 - `src/i18n/<lang>.json` — every UI string, for `en`, `hi` and `ml`.
 - `data/actions.json` — official emergency actions (call number, SMS block commands) per bank.
