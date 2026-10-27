@@ -189,3 +189,42 @@ describe('transcript normalisation', () => {
     expect(matchIntent('tax is due')).toBeNull()
   })
 })
+
+/**
+ * Ways a speech recogniser writes the same request back: Latin
+ * acronyms inside Hindi or Malayalam, dotted acronyms, nukta and chillu
+ * spellings, and other words for lost or stolen.
+ */
+describe('recogniser variations', () => {
+  const VARIATIONS: Case[] = [
+    // English
+    { phrase: 'My Axis Bank card was stolen.', expected: { bank: 'axis', problem: 'debit_lost' } },
+    { phrase: 'Someone stole my Axis card', expected: { bank: 'axis', problem: 'debit_lost' } },
+    { phrase: 'My access bank card is stolen', expected: { bank: 'axis', problem: 'debit_lost' } },
+    { phrase: 'I lost my axis card', expected: { bank: 'axis', problem: 'debit_lost' } },
+    { phrase: 'my axis card is missing', expected: { bank: 'axis', problem: 'debit_lost' } },
+    { phrase: 'I misplaced my S.B.I. card', expected: { bank: 'sbi', problem: 'debit_lost' } },
+    { phrase: 'theft of my HDFC card', expected: { bank: 'hdfc', problem: 'debit_lost' } },
+    // Hindi
+    { phrase: 'मेरा HDFC कार्ड खो गया।', expected: { bank: 'hdfc', problem: 'debit_lost' } },
+    { phrase: 'मेरा एचडीएफ़सी कार्ड खो गया', expected: { bank: 'hdfc', problem: 'debit_lost' } },
+    { phrase: 'मेरा एचडीएफसी कार्ड गुम हो गया', expected: { bank: 'hdfc', problem: 'debit_lost' } },
+    { phrase: 'मेरा HDFC का कार्ड चोरी हो गया', expected: { bank: 'hdfc', problem: 'debit_lost' } },
+    { phrase: 'किसी ने मेरा एक्सिस कार्ड चुरा लिया', expected: { bank: 'axis', problem: 'debit_lost' } },
+    { phrase: 'मेरा एसबीआइ कार्ड गायब है', expected: { bank: 'sbi', problem: 'debit_lost' } },
+    // Malayalam
+    { phrase: 'എന്റെ SBI കാർഡ് നഷ്ടപ്പെട്ടു.', expected: { bank: 'sbi', problem: 'debit_lost' } },
+    { phrase: 'എന്റെ എസ്.ബി.ഐ. കാർഡ് നഷ്ടമായി', expected: { bank: 'sbi', problem: 'debit_lost' } },
+    { phrase: 'എന്റെ എസ്ബിഐ കാര\u0d4d\u200dഡ് കാണാതായി', expected: { bank: 'sbi', problem: 'debit_lost' } },
+    { phrase: 'എന്റെ എസ്ബിഐ കാർഡ് മോഷ്ടിക്കപ്പെട്ടു', expected: { bank: 'sbi', problem: 'debit_lost' } },
+    { phrase: 'എന്റെ എസ്ബിഐ കാർഡ് കളഞ്ഞുപോയി', expected: { bank: 'sbi', problem: 'debit_lost' } },
+    { phrase: 'പിഎന\u0d4d\u200dബി കാർഡ് നഷ്ടപ്പെട്ടു', expected: { bank: 'pnb', problem: 'debit_lost' } },
+    // Not a bank, not a problem
+    { phrase: 'please close my account', expected: null },
+    { phrase: 'I cannot access my account', expected: null },
+  ]
+
+  it.each(VARIATIONS)('$phrase', ({ phrase, expected }) => {
+    expect(matchIntent(phrase)).toEqual(expected)
+  })
+})

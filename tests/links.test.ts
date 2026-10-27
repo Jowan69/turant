@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { buildSmsUri, buildTelUri, fillTemplate } from '../src/links'
+import {
+  buildMailtoUri,
+  buildMapsUri,
+  buildSmsUri,
+  buildTelUri,
+  fillTemplate,
+  isEmailAddress,
+} from '../src/links'
 
 describe('fillTemplate', () => {
   it('fills the last four digits', () => {
@@ -59,5 +66,37 @@ describe('buildTelUri', () => {
 
   it('keeps a +91 number as supplied by the data', () => {
     expect(buildTelUri('+912267987700')).toBe('tel:+912267987700')
+  })
+})
+
+describe('buildMailtoUri', () => {
+  it('puts the address before ? and encodes subject and body', () => {
+    expect(buildMailtoUri('branch@example.com', 'Card lost', 'Line one\nLine two')).toBe(
+      'mailto:branch@example.com?subject=Card%20lost&body=Line%20one%0D%0ALine%20two',
+    )
+  })
+
+  it('leaves the To: line empty when no address is given', () => {
+    expect(buildMailtoUri('', 'S', 'B')).toBe('mailto:?subject=S&body=B')
+  })
+
+  it('drops an address that could break the link', () => {
+    expect(buildMailtoUri('a@b.com?bcc=x@y.com', 'S', 'B')).toBe('mailto:?subject=S&body=B')
+    expect(isEmailAddress('not an email')).toBe(false)
+    expect(isEmailAddress(' branch@example.co.in ')).toBe(true)
+  })
+
+  it('keeps Malayalam and & safe inside the body', () => {
+    const body = 'കാർഡ് & പണം'
+    const uri = buildMailtoUri('', 'S', body)
+    expect(decodeURIComponent(uri.split('&body=')[1])).toBe(body)
+  })
+})
+
+describe('buildMapsUri', () => {
+  it('builds a Google Maps search with the encoded query', () => {
+    expect(buildMapsUri('Main Road, Sometown & Co')).toBe(
+      'https://www.google.com/maps/search/?api=1&query=Main%20Road%2C%20Sometown%20%26%20Co',
+    )
   })
 })

@@ -135,6 +135,16 @@ button:focus-visible {
   color: var(--muted);
 }
 
+/* Shown on every screen, under the language switch. */
+.safety-banner {
+  margin: 0 0 1rem;
+  padding: 0.5rem 0.9rem;
+  border-left: 0.35rem solid var(--danger);
+  background: var(--panel);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
 .disclaimer {
   margin: 1.5rem 0 0;
   padding-top: 1rem;
@@ -378,9 +388,42 @@ button:focus-visible {
   height: 3rem;
 }
 
-.mic-button.is-listening {
+.mic-button.is-recording {
   background: var(--danger);
   border-color: var(--danger);
+}
+
+/* Opening the mic or waiting for the text: taps are ignored until it is done. */
+.mic-button.is-busy,
+.dictate-button.is-busy {
+  cursor: progress;
+  opacity: 0.75;
+}
+
+.voice-privacy {
+  margin: 0.4rem 0 0;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+/* What the transcription service heard, shown on the screen voice opened. */
+.heard {
+  margin: 0 0 1rem;
+  padding: 0.6rem 0.9rem;
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 0.6rem;
+}
+
+.voice-status .heard {
+  display: block;
+  margin: 0 0 0.4rem;
+  color: var(--fg);
+  font-weight: 400;
+}
+
+.heard-label {
+  font-weight: 700;
 }
 
 .voice-status {
@@ -404,4 +447,304 @@ button:focus-visible {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
+/* Complaint form */
+
+.safety {
+  margin: 0 0 1rem;
+  padding: 0.8rem 1rem;
+  border: 2px solid var(--danger);
+  border-radius: 0.6rem;
+  font-weight: 700;
+}
+
+.complaint-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.optional {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.field-hint {
+  margin: 0 0 0.4rem;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.field-error,
+.form-error {
+  margin: 0.3rem 0 0;
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.field-error:empty,
+.form-error:empty {
+  display: none;
+}
+
+.text-input {
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0.6rem 0.8rem;
+  color: var(--fg);
+  background: var(--bg);
+  border: 2px solid var(--line);
+  border-radius: 0.5rem;
+  font: inherit;
+  font-size: 1rem;
+}
+
+textarea.text-input {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.text-input:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.text-input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.fixed-value {
+  margin: 0;
+  font-weight: 700;
+}
+
+.branch-box {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.branch-box:empty {
+  display: none;
+}
+
+.branch-found {
+  padding: 0.8rem 1rem;
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 0.5rem;
+}
+
+.branch-address {
+  margin: 0;
+  color: var(--muted);
+}
+
+.dictate-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: flex-start;
+  margin-top: 0.6rem;
+  font-weight: 700;
+}
+
+.dictate-button .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.dictate-button.is-recording {
+  color: var(--accent-fg);
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+/* Letter screen */
+
+.letter-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0 0 1.5rem;
+}
+
+.letter-actions .note {
+  margin: 0;
+}
+
+.letter-actions .action-button.secondary {
+  margin-top: 0;
+}
+
+.print-tip {
+  margin: 0;
+  padding: 0.8rem 1rem;
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 0.6rem;
+  font-weight: 700;
+}
+
+.branch-directions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.branch-directions[hidden] {
+  display: none;
+}
+
+.branch-where {
+  margin: 0;
+}
+
+.letter {
+  padding: 1rem;
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 0.6rem;
+}
+
+.letter p {
+  margin: 0 0 0.9rem;
+}
+
+.letter-lines {
+  white-space: pre-line;
+}
+
+.letter-own {
+  /* The user's own words, exactly as typed: keep spaces and line breaks. */
+  white-space: pre-wrap;
+}
+
+.letter-subject,
+.letter-own-heading {
+  font-weight: 700;
+}
+
+.letter-own-heading {
+  margin-bottom: 0.3rem !important;
+}
+
+.letter-footer {
+  margin: 1.25rem 0 0 !important;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+/* Signature and bank-receipt boxes exist only on paper. */
+.print-only {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 20mm;
+  }
+
+  :root {
+    color-scheme: light;
+    font-size: 12pt;
+    --bg: #ffffff;
+    --fg: #000000;
+    --muted: #000000;
+    --line: #000000;
+    --panel: #ffffff;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  body {
+    line-height: 1.45;
+  }
+
+  #app {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Only the letter: no language switch, buttons, tips or disclaimer. */
+  #app > :not(.letter) {
+    display: none !important;
+  }
+
+  .letter {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: #ffffff;
+    color: #000000;
+  }
+
+  .letter * {
+    color: #000000 !important;
+    background: transparent !important;
+  }
+
+  .letter p {
+    margin: 0 0 4mm;
+    orphans: 3;
+    widows: 3;
+  }
+
+  .print-only {
+    display: block;
+  }
+
+  .sign-block {
+    margin: 6mm 0 0;
+    break-inside: avoid;
+  }
+
+  .sign-box {
+    width: 60mm;
+    height: 25mm;
+    margin: 0 0 4mm;
+    padding: 2mm;
+    border: 1px solid #000000;
+    font-size: 10pt;
+  }
+
+  .bank-box {
+    margin: 6mm 0 0;
+    padding: 3mm 4mm;
+    border: 1px solid #000000;
+    break-inside: avoid;
+  }
+
+  .bank-box p {
+    margin: 0 0 3mm;
+  }
+
+  .bank-box-title {
+    font-weight: 700;
+  }
+
+  .stamp {
+    height: 25mm;
+    margin: 0 !important;
+  }
+
+  .letter-footer {
+    margin-top: 6mm !important;
+    padding-top: 3mm;
+    border-top: 1px solid #000000;
+    font-size: 10pt;
+  }
 }

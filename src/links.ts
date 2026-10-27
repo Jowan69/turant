@@ -29,3 +29,26 @@ export function buildSmsUri(to: string, body: string, userAgent: string): string
 export function buildTelUri(to: string): string {
   return `tel:${to}`
 }
+
+const EMAIL_PATTERN = /^[^\s@?&#,;:<>"]+@[^\s@?&#,;:<>"]+\.[^\s@?&#,;:<>".]{2,}$/
+
+/** A plain address the user pasted, safe to put before `?` in a mailto: link. */
+export function isEmailAddress(value: string): boolean {
+  return EMAIL_PATTERN.test(value.trim())
+}
+
+/**
+ * Opens the user's own mail app with the letter filled in; the user presses
+ * Send. An invalid or empty address leaves the To: line blank. Line breaks
+ * become CRLF as RFC 6068 asks.
+ */
+export function buildMailtoUri(to: string, subject: string, body: string): string {
+  const address = isEmailAddress(to) ? to.trim() : ''
+  const encodedBody = encodeURIComponent(body.replace(/\r?\n/g, '\r\n'))
+  return `mailto:${address}?subject=${encodeURIComponent(subject)}&body=${encodedBody}`
+}
+
+/** A Google Maps search for the branch. Only the branch name and address go in. */
+export function buildMapsUri(query: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
+}

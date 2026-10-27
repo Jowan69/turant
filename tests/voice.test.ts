@@ -9,16 +9,19 @@ const REPORTED = [
   {
     language: 'Malayalam',
     phrase: 'എന്റെ എസ്ബിഐ കാർഡ് നഷ്ടപ്പെട്ടു',
+    bank: 'sbi',
     actionId: 'sbi-debit',
   },
   {
     language: 'Hindi',
     phrase: 'मेरा HDFC कार्ड खो गया',
+    bank: 'hdfc',
     actionId: 'hdfc-debit',
   },
   {
     language: 'English',
     phrase: 'my axis card is stolen',
+    bank: 'axis',
     actionId: 'axis-debit',
   },
 ] as const
@@ -36,13 +39,25 @@ describe('spoken phrase -> existing action', () => {
     }
   })
 
-  it('routes each phrase to the expected debit-card action', () => {
-    for (const { actionId } of REPORTED) {
-      const action = actions.find((entry) => entry.id === actionId)
-      expect(action?.problem, actionId).toBe('debit_lost')
-      expect(action?.bank, actionId).not.toBe('any')
-    }
-  })
+  it.each(REPORTED)(
+    '$language: the resolved entry in data/actions.json is $bank / debit_lost',
+    ({ phrase, bank }) => {
+      const route = resolveSpeechRoute(phrase, actions)
+      if (route.kind !== 'action') throw new Error(`expected an action, got ${route.kind}`)
+
+      // Look the resolved id up in the shipped data, and check what it points at.
+      const resolved = actions.find((entry) => entry.id === route.id)
+      expect(resolved, route.id).toBeDefined()
+      expect(resolved?.bank).toBe(bank)
+      expect(resolved?.problem).toBe('debit_lost')
+
+      // The data holds exactly one debit-card entry for this bank, and that is the one.
+      const debitForBank = actions.filter(
+        (entry) => entry.bank === bank && entry.problem === 'debit_lost',
+      )
+      expect(debitForBank.map((entry) => entry.id)).toEqual([route.id])
+    },
+  )
 })
 
 describe('resolveSpeechRoute fallbacks', () => {

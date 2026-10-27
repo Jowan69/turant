@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The brief asked for Node 20, but vitest 5 needs Node ^22.12.0 || ^24 || >=26,
+      # so tests cannot run on 20. Node 22 is the lowest version that works.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run validate
+      - run: npm test
+      - run: npm run build
+
+      # The CSP in vercel.json blocks inline scripts and styles, so the built
+      # page must load only its own files.
+      - name: Built page has no inline scripts or styles
+        run: |
+          if grep -Eil '<script(\s[^>]*)?>[^<]|<style|\sstyle=|\son[a-z]+=' dist/index.html; then
+            echo "dist/index.html must not contain inline scripts or styles" >&2
+            exit 1
+          fi

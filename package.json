@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Mobile-first emergency help for Indian bank customers: opens the SMS app with the bank's official block command prefilled, or dials the bank's official number, in English, Hindi or Malayalam, and drafts a complaint letter to email or print. Static, no backend, no runtime dependencies.",
+  "description": "Mobile-first emergency help for Indian bank customers: opens the SMS app with the bank's official block command prefilled, or dials the bank's official number, in English, Hindi or Malayalam, and drafts a complaint letter to email or print. Voice input uses the browser's built-in speech recognition (Google's service in Chrome); Turant has no server and never receives audio or text. No runtime dependencies.",
+  "engines": {
+    "node": ">=22.12"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
