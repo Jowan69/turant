@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "note": "Official grievance channels, one entry per bank, used to draft a complaint letter the user emails or prints themselves. Populate only from the bank's own official website or an RBI-published contact page, and record the source in evidence/. Never invent an email address, phone number or portal URL.",
+  "banks": []
+}

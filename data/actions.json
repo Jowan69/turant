@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "note": "Official emergency actions, one entry per bank. Populate only from the bank's own official website or an RBI-published contact page, and record the source in evidence/. Never invent a phone number or SMS command. The app reads this file at build time; it never calls a network at runtime.",
+  "banks": []
+}

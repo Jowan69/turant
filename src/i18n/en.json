@@ -1,0 +1,8 @@
+{
+  "app.title": "Turant",
+  "app.tagline": "Emergency help for your bank account — in your language.",
+  "app.langLabel": "Language",
+  "app.disclaimer": "Turant never sends anything by itself. You always press Send or Call.",
+  "status.noData": "Bank data is not loaded yet",
+  "status.noDataDetail": "Official phone numbers and block commands will appear here once they are added to data/actions.json from the bank's own official source."
+}

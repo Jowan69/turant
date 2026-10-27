@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Turant emergency actions",
+  "type": "object",
+  "required": ["version", "banks"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "note": { "type": "string" },
+    "banks": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/bank" }
+    }
+  },
+  "definitions": {
+    "localizedText": {
+      "type": "object",
+      "required": ["en"],
+      "additionalProperties": false,
+      "properties": {
+        "en": { "type": "string", "minLength": 1 },
+        "hi": { "type": "string", "minLength": 1 },
+        "ml": { "type": "string", "minLength": 1 }
+      }
+    },
+    "bank": {
+      "type": "object",
+      "required": ["id", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "source": {
+          "type": "string",
+          "description": "Where this entry was verified from, e.g. evidence/ entry id."
+        },
+        "call": {
+          "type": "object",
+          "description": "Official number the app dials. Turant never places the call itself.",
+          "required": ["number"],
+          "additionalProperties": false,
+          "properties": {
+            "number": { "type": "string", "minLength": 1 },
+            "tollFree": { "type": "boolean" },
+            "hours": { "$ref": "#/definitions/localizedText" }
+          }
+        },
+        "sms": {
+          "type": "object",
+          "description": "Official SMS block command the user sends from their own phone.",
+          "required": ["number", "commands"],
+          "additionalProperties": false,
+          "properties": {
+            "number": { "type": "string", "minLength": 1 },
+            "commands": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["id", "text"],
+                "additionalProperties": false,
+                "properties": {
+                  "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Verbatim official command. Use {placeholders} for digits the user supplies at tap time; never store real card or account digits here."
+                  },
+                  "placeholders": {
+                    "type": "array",
+                    "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

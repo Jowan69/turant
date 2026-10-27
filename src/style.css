@@ -1,0 +1,142 @@
+/*
+ * Turant styles: mobile-first, single column, high contrast.
+ * Base font size is 18px and nothing is allowed below it (all sizes use rem).
+ * Verified to work down to a 360px-wide screen.
+ */
+
+:root {
+  color-scheme: light dark;
+  font-size: 18px;
+
+  --bg: #ffffff;
+  --fg: #10151c;
+  --muted: #3f4753;
+  --line: #a9b2bf;
+  --panel: #f2f5f9;
+  --accent: #063a8f;
+  --accent-fg: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #f2f6fc;
+    --muted: #c6cfdb;
+    --line: #4a5566;
+    --panel: #161c25;
+    --accent: #9dc0ff;
+    --accent-fg: #0b1016;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Noto Sans",
+    "Noto Sans Devanagari",
+    "Noto Sans Malayalam",
+    sans-serif;
+  font-size: 1rem; /* 18px, inherited from :root */
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+  overflow-wrap: break-word;
+}
+
+#app {
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+}
+
+h1 {
+  font-size: 1.75rem;
+  line-height: 1.2;
+  margin: 0 0 0.5rem;
+}
+
+h2 {
+  font-size: 1.15rem;
+  line-height: 1.3;
+  margin: 0 0 0.5rem;
+}
+
+.tagline {
+  color: var(--muted);
+  margin: 0 0 1.5rem;
+}
+
+.lang-label {
+  font-size: 1rem;
+  color: var(--muted);
+  margin: 0 0 0.5rem;
+}
+
+.langs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1.5rem;
+}
+
+button {
+  font: inherit;
+  font-size: 1rem;
+  min-height: 2.75rem;
+  padding: 0.55rem 0.9rem;
+  color: var(--fg);
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+button:hover {
+  border-color: var(--accent);
+}
+
+button[aria-pressed="true"] {
+  color: var(--accent-fg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.status {
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 0.6rem;
+  padding: 1rem;
+}
+
+.status p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.disclaimer {
+  margin: 1.5rem 0 0;
+  padding-top: 1rem;
+  border-top: 2px solid var(--line);
+  color: var(--muted);
+  font-size: 1rem;
+}
