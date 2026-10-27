@@ -349,3 +349,59 @@ button:focus-visible {
   color: var(--muted);
   font-size: 1rem;
 }
+
+/* Voice input on the home screen */
+
+.voice {
+  margin: 0 0 1.5rem;
+}
+
+.mic-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  min-height: 6.5rem;
+  padding: 1rem;
+  color: var(--accent-fg);
+  background: var(--accent);
+  border: 2px solid var(--accent);
+  border-radius: 0.75rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.mic-button .icon {
+  width: 3rem;
+  height: 3rem;
+}
+
+.mic-button.is-listening {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.voice-status {
+  min-height: 1.6rem;
+  margin: 0.6rem 0 0;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.voice-lang-section {
+  margin: 1rem 0 0;
+}
+
+.voice-lang-label {
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.voice-langs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

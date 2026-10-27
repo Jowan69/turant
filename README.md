@@ -1,6 +1,6 @@
 # Turant
 
-Mobile-first emergency help for Indian bank customers. In an emergency (lost card, UPI misuse, money stolen) Turant opens the user's SMS app with the bank's official block command prefilled, or dials the bank's official number, in English, Hindi or Malayalam. It also drafts a complaint letter the user can email or print.
+Mobile-first emergency help for Indian bank customers. In an emergency (lost card, UPI misuse, money stolen) Turant opens the user's SMS app with the bank's official block command prefilled, or dials the bank's official number, in English, Hindi or Malayalam. The user can also simply say the bank and the problem; the microphone listens in the language chosen next to it, which does not have to match the interface language. It also drafts a complaint letter the user can email or print.
 
 Turant is a static web app. There is no backend, no analytics and no runtime dependency, and it never sends anything by itself — the user always presses Send or Call.
 
@@ -22,8 +22,10 @@ npm run preview   # serve the built output
 ## Layout
 
 - `index.html` — the shell, with `<main id="app">`.
-- `src/main.ts` — the hash router and the three screens (bank, problem, action).
+- `src/main.ts` — the hash router and the three screens (bank, problem, action), plus the language switch and voice input.
 - `src/links.ts` — pure helpers for the SMS body, `sms:` links and `tel:` links.
+- `src/match.ts` — turns spoken words into a bank and a problem using keyword lists in English, Hindi and Malayalam.
+- `src/voice.ts` — pure transcript-to-action routing, testable without a microphone or a browser.
 - `src/style.css` — plain CSS, single column, 18px minimum text, works from 360px.
 - `src/i18n/<lang>.json` — every UI string, for `en`, `hi` and `ml`.
 - `data/actions.json` — official emergency actions (call number, SMS block commands) per bank.

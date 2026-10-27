@@ -3,6 +3,8 @@ import en from './i18n/en.json'
 import hi from './i18n/hi.json'
 import ml from './i18n/ml.json'
 import { buildSmsUri, buildTelUri, fillTemplate } from './links'
+import { type BankId, type Problem } from './match'
+import { resolveSpeechRoute } from './voice'
 
 /** Languages Turant supports. Every UI string lives in src/i18n/<lang>.json. */
 export type Lang = 'en' | 'hi' | 'ml'
@@ -12,7 +14,7 @@ export const LANGS: readonly Lang[] = ['en', 'hi', 'ml']
 /** Endonyms: language names are shown in their own script, so they are not translated. */
 const LANG_NAMES: Record<Lang, string> = {
   en: 'English',
-  hi: 'हिन्दी',
+  hi: 'हिंदी',
   ml: 'മലയാളം',
 }
 
@@ -23,9 +25,7 @@ export function t(lang: Lang, key: string): string {
   return STRINGS[lang][key] ?? STRINGS.en[key] ?? key
 }
 
-type BankId = 'sbi' | 'hdfc' | 'icici' | 'axis' | 'pnb'
 type AnyBank = BankId | 'any'
-type Problem = 'debit_lost' | 'credit_lost' | 'upi_misuse' | 'money_taken'
 type Channel = 'sms' | 'call'
 type Needs = 'last4' | 'full_card' | 'none'
 
@@ -52,7 +52,7 @@ const BANK_IDS: readonly BankId[] = ['sbi', 'hdfc', 'icici', 'axis', 'pnb']
 /** User-supplied URL shown next to the stolen-money action. */
 const CYBERCRIME_URL = 'https://cybercrime.gov.in'
 
-type IconName = 'bank' | 'house' | 'card' | 'diamond' | 'shield' | 'alert'
+type IconName = 'bank' | 'house' | 'card' | 'diamond' | 'shield' | 'alert' | 'mic'
 
 const ICON_PATHS: Record<IconName, readonly string[]> = {
   bank: [
@@ -71,6 +71,12 @@ const ICON_PATHS: Record<IconName, readonly string[]> = {
     'M17 24 L22 29 L31 18',
   ],
   alert: ['M24 7 L44 41 H4 Z', 'M24 18 V29', 'M24 35 V36'],
+  mic: [
+    'M24 5 C20.7 5 18 7.7 18 11 V24 C18 27.3 20.7 30 24 30 C27.3 30 30 27.3 30 24 V11 C30 7.7 27.3 5 24 5 Z',
+    'M11 22 V24 C11 31.2 16.8 37 24 37 C31.2 37 37 31.2 37 24 V22',
+    'M24 37 V44',
+    'M16 44 H32',
+  ],
 }
 
 const BANK_TILES: readonly { id: BankId; icon: IconName }[] = [
@@ -89,10 +95,34 @@ function isBankId(value: string): value is BankId {
   return (BANK_IDS as readonly string[]).includes(value)
 }
 
-/** Prefer an explicit ?lang=, then the device language, then English. */
+/** The only thing Turant stores: the language the user chose. */
+const LANG_STORAGE_KEY = 'turant.lang'
+
+function readStoredLang(): Lang | null {
+  try {
+    const stored = window.localStorage.getItem(LANG_STORAGE_KEY)
+    return isLang(stored) ? stored : null
+  } catch {
+    // Storage can be blocked (private mode, embedded browser): fall back below.
+    return null
+  }
+}
+
+function storeLang(value: Lang): void {
+  try {
+    window.localStorage.setItem(LANG_STORAGE_KEY, value)
+  } catch {
+    // The switch still works for this visit when storage is unavailable.
+  }
+}
+
+/** Prefer an explicit ?lang= (links and tests), then the stored choice, then the device. */
 function detectLang(): Lang {
   const requested = new URLSearchParams(window.location.search).get('lang')
   if (isLang(requested)) return requested
+
+  const stored = readStoredLang()
+  if (stored) return stored
 
   const device = navigator.language.toLowerCase()
   if (device.startsWith('hi')) return 'hi'
@@ -101,6 +131,13 @@ function detectLang(): Lang {
 }
 
 let lang: Lang = detectLang()
+
+/**
+ * Language the microphone listens in. It follows the UI language until the
+ * user picks a different spoken language, so a user can keep the interface in
+ * English and still speak Hindi or Malayalam.
+ */
+let voiceLang: Lang = lang
 
 function el<K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -166,6 +203,8 @@ function renderLanguageSwitch(): HTMLElement {
     button.setAttribute('aria-pressed', String(id === lang))
     button.addEventListener('click', () => {
       lang = id
+      voiceLang = id
+      storeLang(id)
       render()
     })
     buttons.append(button)
@@ -180,10 +219,219 @@ function moneyStolenAction(): Action | undefined {
     actions.find((action) => action.problem === 'money_taken')
 }
 
+/* Speech input. The Web Speech API is not in TypeScript's DOM library, so only
+   the small surface Turant uses is declared here. */
+
+interface SpeechRecognitionAlternativeLike {
+  transcript: string
+}
+
+interface SpeechRecognitionResultLike {
+  readonly length: number
+  readonly [index: number]: SpeechRecognitionAlternativeLike
+}
+
+interface SpeechRecognitionResultListLike {
+  readonly length: number
+  readonly [index: number]: SpeechRecognitionResultLike
+}
+
+interface SpeechRecognitionEventLike {
+  readonly resultIndex: number
+  readonly results: SpeechRecognitionResultListLike
+}
+
+interface SpeechRecognitionErrorEventLike {
+  readonly error: string
+}
+
+interface SpeechRecognitionLike {
+  lang: string
+  continuous: boolean
+  interimResults: boolean
+  maxAlternatives: number
+  onstart: (() => void) | null
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null
+  onerror: ((event: SpeechRecognitionErrorEventLike) => void) | null
+  onend: (() => void) | null
+  start(): void
+  stop(): void
+  abort(): void
+}
+
+type SpeechRecognitionCtor = new () => SpeechRecognitionLike
+
+declare global {
+  interface Window {
+    SpeechRecognition?: SpeechRecognitionCtor
+    webkitSpeechRecognition?: SpeechRecognitionCtor
+  }
+}
+
+const SPEECH_LANGS: Record<Lang, string> = { en: 'en-IN', hi: 'hi-IN', ml: 'ml-IN' }
+
+/** Only one recognition runs at a time; a new render cancels the old one. */
+let activeRecognition: SpeechRecognitionLike | null = null
+
+function speechRecognitionCtor(): SpeechRecognitionCtor | undefined {
+  return window.SpeechRecognition ?? window.webkitSpeechRecognition
+}
+
+function stopActiveRecognition(): void {
+  const active = activeRecognition
+  activeRecognition = null
+  if (!active) return
+  try {
+    active.abort()
+  } catch {
+    // Already stopped.
+  }
+}
+
+/** Turn a recogniser error code into one fixed, translated message. */
+function speechErrorKey(error: string): string {
+  if (error === 'not-allowed' || error === 'service-not-allowed') return 'voice.micDenied'
+  if (error === 'no-speech') return 'voice.notHeard'
+  return 'voice.failed'
+}
+
+/** Route speech only to ids that already exist in data/actions.json. */
+function routeFromSpeech(transcript: string, status: HTMLElement): void {
+  const route = resolveSpeechRoute(transcript, actions)
+
+  if (route.kind === 'action') {
+    window.location.hash = `#/action/${route.id}`
+    return
+  }
+
+  if (route.kind === 'bank') {
+    window.location.hash = `#/bank/${route.bank}`
+    return
+  }
+
+  status.textContent = t(lang, 'voice.pleaseTapBank')
+}
+
+function renderVoice(): HTMLElement | null {
+  const Ctor = speechRecognitionCtor()
+  if (!Ctor) return null
+
+  const section = el('section', 'voice')
+  const button = el('button', 'mic-button')
+  button.type = 'button'
+  button.setAttribute('aria-pressed', 'false')
+  button.append(makeIcon('mic'), el('span', 'mic-label', t(lang, 'voice.mic')))
+
+  const status = el('p', 'voice-status')
+  status.setAttribute('aria-live', 'polite')
+
+  const setIdle = (): void => {
+    button.setAttribute('aria-pressed', 'false')
+    button.classList.remove('is-listening')
+    status.textContent = ''
+  }
+
+  /* The recogniser must be told which language is being spoken, and that is
+     not always the UI language: the interface can stay in English while the
+     user speaks Malayalam or Hindi. */
+  const langSection = el('div', 'voice-lang-section')
+  langSection.append(el('p', 'voice-lang-label', t(lang, 'voice.speakIn')))
+
+  const langChoices = el('div', 'voice-langs')
+  langChoices.setAttribute('role', 'group')
+  langChoices.setAttribute('aria-label', t(lang, 'voice.speakIn'))
+
+  const chips: HTMLButtonElement[] = []
+  for (const id of LANGS) {
+    const chip = el('button', undefined, LANG_NAMES[id])
+    chip.type = 'button'
+    chip.dataset.lang = id
+    chip.setAttribute('aria-pressed', String(id === voiceLang))
+    chip.addEventListener('click', () => {
+      voiceLang = id
+      for (const other of chips) {
+        other.setAttribute('aria-pressed', String(other.dataset.lang === voiceLang))
+      }
+      if (activeRecognition) {
+        stopActiveRecognition()
+        setIdle()
+      }
+    })
+    chips.push(chip)
+    langChoices.append(chip)
+  }
+  langSection.append(langChoices)
+
+  button.addEventListener('click', () => {
+    if (activeRecognition) {
+      stopActiveRecognition()
+      setIdle()
+      return
+    }
+
+    const recognition = new Ctor()
+    activeRecognition = recognition
+    recognition.lang = SPEECH_LANGS[voiceLang]
+    recognition.continuous = false
+    recognition.interimResults = false
+    recognition.maxAlternatives = 1
+
+    /** Whether this attempt produced a result or an error. */
+    let settled = false
+
+    const finish = (): void => {
+      if (activeRecognition !== recognition) return
+      activeRecognition = null
+      setIdle()
+    }
+
+    recognition.onstart = () => {
+      if (activeRecognition !== recognition) return
+      button.setAttribute('aria-pressed', 'true')
+      button.classList.add('is-listening')
+      status.textContent = t(lang, 'voice.listening')
+    }
+
+    recognition.onresult = (event) => {
+      if (activeRecognition !== recognition) return
+      settled = true
+      const transcript = event.results[event.resultIndex]?.[0]?.transcript ?? ''
+      finish()
+      routeFromSpeech(transcript, status)
+    }
+
+    recognition.onerror = (event) => {
+      if (activeRecognition !== recognition) return
+      settled = true
+      // finish() clears the status, so write the message after it.
+      finish()
+      status.textContent = t(lang, speechErrorKey(event.error))
+    }
+
+    recognition.onend = () => {
+      if (activeRecognition !== recognition) return
+      finish()
+      if (!settled) status.textContent = t(lang, 'voice.notHeard')
+    }
+
+    try {
+      recognition.start()
+    } catch {
+      finish()
+      status.textContent = t(lang, 'voice.failed')
+    }
+  })
+
+  section.append(button, status, langSection)
+  return section
+}
+
 function renderHome(app: HTMLElement): void {
   app.append(el('h1', undefined, t(lang, 'app.title')))
   app.append(el('p', 'tagline', t(lang, 'app.tagline')))
-  app.append(renderLanguageSwitch())
+
+  const voice = renderVoice()
+  if (voice) app.append(voice)
 
   const section = el('section', 'bank-picker')
   section.append(el('h2', 'section-label', t(lang, 'home.pickBank')))
@@ -391,8 +639,10 @@ function render(): void {
   const app = document.querySelector<HTMLElement>('#app')
   if (!app) return
 
+  stopActiveRecognition()
   document.documentElement.lang = lang
   app.replaceChildren()
+  app.append(renderLanguageSwitch())
 
   const route = parseRoute(window.location.hash)
   if (route.name === 'bank') renderBank(app, route.bank)

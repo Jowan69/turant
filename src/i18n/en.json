@@ -30,5 +30,12 @@
   "action.otherWays": "Other ways to do this",
   "action.cybercrime": "File a complaint at cybercrime.gov.in",
   "action.notFound": "That action was not found.",
-  "nav.back": "Back"
+  "nav.back": "Back",
+  "voice.mic": "Speak",
+  "voice.listening": "Listening…",
+  "voice.speakIn": "Speak in",
+  "voice.pleaseTapBank": "Please tap your bank",
+  "voice.micDenied": "Microphone access is blocked. Allow it in the browser, or tap your bank below.",
+  "voice.notHeard": "I did not hear anything. Tap the mic and try again, or tap your bank below.",
+  "voice.failed": "Voice input is not available right now. Tap your bank below."
 }
